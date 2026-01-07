@@ -1,130 +1,194 @@
-# UniViT-MIL: A Unified Vision Transformer and Multi-Instance Learning Framework
+# UniViT-MIL
 
-**Official PyTorch Implementation**
+## A Unified Vision Transformer and Multi-Instance Learning Framework for Multi-Cancer Histopathology and Biomarker Prediction
 
-![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-ee4c2c?logo=pytorch)
-![License](https://img.shields.io/badge/License-MIT-blue.svg)
-![Status](https://img.shields.io/badge/Status-Research_Prototype-green)
+Official PyTorch implementation of **UniViT-MIL**, a unified deep learning framework that integrates **Vision Transformers (ViT)** with **Attention-based Multi-Instance Learning (MIL)** for weakly supervised whole-slide image (WSI) analysis.
 
-## Overview
+---
 
-Modern computational pathology workflows primarily rely on Convolutional Neural Networks (CNNs), which often struggle to capture global morphological context due to limited receptive fields. Furthermore, the prediction of genomic biomarkers (e.g., TMB, MSI) typically requires expensive next-generation sequencing (NGS), limiting accessibility in resource-constrained settings.
+## Abstract
 
-**UniViT-MIL** presents a unified deep learning framework that integrates a **Vision Transformer (ViT)** backbone with **Attention-based Multi-Instance Learning (MIL)**. This architecture is designed to perform weakly-supervised multi-cancer classification and genomic biomarker prediction directly from standard H&E-stained Whole Slide Images (WSIs).
+Computational pathology increasingly relies on deep learning for automated cancer diagnosis and biomarker inference from histopathological whole-slide images (WSIs). However, the gigapixel resolution of WSIs and the scarcity of pixel-level annotations pose significant challenges. UniViT-MIL addresses these limitations by combining transformer-based global representation learning with attention-driven multi-instance aggregation. The framework enables accurate multi-cancer classification and biomarker prediction using only slide-level supervision, while maintaining interpretability through attention heatmaps.
 
+---
 
+## Method Overview
 
-By leveraging the self-attention mechanisms of Transformers, UniViT-MIL captures long-range dependencies across tissue slides, enabling:
-1.  **Multi-Organ Classification:** Accurate subtyping for Bone, Breast, Cervical, Prostate, and Endometrial cancers.
-2.  **Virtual Biopsy:** Prediction of high-cost biomarkers (e.g., *POLE* mutations, High TMB) from morphological features alone.
-3.  **Interpretability:** Generation of high-resolution attention heatmaps to localize diagnostically relevant regions.
+The UniViT-MIL pipeline consists of four principal stages:
 
-## Key Contributions
+1. **Patch Extraction and Preprocessing**
+   WSIs are segmented to remove background regions, tiled into fixed-size patches, and normalized using standard stain normalization techniques.
 
-* **Unified Architecture:** A single framework capable of generalizing across five distinct cancer types without architecture modification.
-* **Global Context Awareness:** Utilizes Vision Transformers to overcome the locality bias of CNNs, resulting in superior feature extraction from gigapixel-resolution images.
-* **Weakly Supervised Learning:** Operates efficiently using only slide-level labels, eliminating the need for expensive pixel-level annotations.
-* **Morphological-to-Molecular Mapping:** Demonstrates a significant correlation between tissue morphology and genomic status, offering a cost-effective alternative to sequencing.
+2. **Patch Encoding via Vision Transformers**
+   Each patch is encoded using a Vision Transformer backbone, enabling long-range dependency modeling across spatially distant tissue regions.
 
-## Methodology
+3. **Attention-based Multi-Instance Learning Aggregation**
+   Patch embeddings are aggregated using a learnable attention mechanism that assigns higher importance to diagnostically relevant regions.
 
-The framework operates in a multi-stage pipeline:
+4. **Slide-level Prediction**
+   Aggregated representations are passed to task-specific classification heads for histological subtype classification or biomarker prediction.
 
-1.  **Preprocessing:** WSIs are tiled into non-overlapping patches. Background subtraction and Macenko stain normalization are applied to ensure consistency.
-2.  **Feature Encoding:** A pre-trained Vision Transformer processes patches to generate high-dimensional embeddings, capturing global semantic features.
-3.  **MIL Aggregation:** An attention-based pooling mechanism aggregates patch embeddings into a single slide-level representation, assigning higher weights to tumor-rich regions.
-4.  **Prediction:** Dual classification heads output the histological subtype and, where applicable, the genomic biomarker status.
+---
 
-## Getting Started
+## Architecture
 
-### Prerequisites
+```
+Whole Slide Image (WSI)
+        ↓
+Patch Extraction and Stain Normalization
+        ↓
+Vision Transformer Encoder
+        ↓
+Patch-level Embeddings
+        ↓
+Attention-based MIL Pooling
+        ↓
+Slide-level Representation
+        ↓
+Classification / Biomarker Prediction Head
+```
 
-* Linux or macOS
-* Python 3.8+
-* PyTorch 1.12+
-* CUDA 11.0+ (recommended for GPU acceleration)
+The framework jointly models global tissue context and localized morphological patterns by fusing transformer representations with MIL aggregation.
 
-### Installation
+---
 
-Clone the repository and install the required dependencies:
+## Repository Structure
+
+```
+UniViT_MIL/
+│
+├── dataset_csv/        # Example datasets and CSV metadata
+├── dataset_modules/   # Dataset loaders (generic, HDF5, WSI)
+├── models/             # Vision Transformer, MIL, and CLAM-style modules
+├── heatmaps/           # Attention-based visualization outputs
+├── presets/            # Training and experiment configurations
+├── splits/             # Patient-level train/validation/test splits
+├── utils/              # Evaluation, transformation, and helper utilities
+├── train.py            # Model training script
+├── evaluate.py         # Model evaluation script
+└── README.md
+```
+
+---
+
+## Installation
+
+### Requirements
+
+* Python 3.8 or later
+* PyTorch 1.12 or later
+* CUDA 11 or later (recommended)
+
+### Setup
 
 ```bash
-git clone [https://github.com/YourUsername/UniViT-MIL.git](https://github.com/YourUsername/UniViT-MIL.git)
-cd UniViT-MIL
+git clone https://github.com/amr-mousa-1/Uni-ViT_MIL.git
+cd Uni-ViT_MIL
 pip install -r requirements.txt
-Data Preparation
-The model expects Whole Slide Images (WSIs) or pre-extracted feature bags. The code is compatible with standard datasets such as TCGA, PANDA, and ICIAR.
+```
 
-To process raw WSIs into patches:
+---
 
-Bash
+## Data Preparation
 
+The framework supports both whole-slide image datasets and pre-extracted feature bags. It has been validated on TCGA, ICIAR2018, and SICAPv2 datasets.
+
+### WSI Preprocessing
+
+```bash
 python data/preprocess_wsi.py \
-    --source_dir /path/to/raw_slides \
-    --output_dir /path/to/processed_patches \
-    --patch_size 256 \
-    --magnification 20x
-Training
-The training process utilizes a combined loss function (Cross-Entropy + Contrastive Loss) to optimize the model.
+  --source_dir /path/to/raw_slides \
+  --output_dir /path/to/processed_patches \
+  --patch_size 224 \
+  --magnification 20x
+```
 
-1. Multi-Cancer Classification
-To train the model on the multi-organ dataset:
+Preprocessing steps include tissue masking, patch extraction, stain normalization, and class balancing.
 
-Bash
+---
 
+## Training
+
+### Multi-Cancer Classification
+
+```bash
 python train.py \
-    --task classification \
-    --data_root /path/to/data \
-    --arch vit_base \
-    --mil_type attention \
-    --epochs 100 \
-    --batch_size 32 \
-    --lr 1e-4 \
-    --save_dir ./checkpoints/classification
+  --task classification \
+  --arch vit_base \
+  --mil_type attention \
+  --epochs 100 \
+  --batch_size 32 \
+  --lr 1e-4
+```
 
-2. Biomarker Prediction (e.g., Endometrial TMB)
-To fine-tune the model for biomarker prediction tasks:
+### Biomarker Prediction
 
-Bash
-
+```bash
 python train.py \
-    --task biomarker \
-    --biomarker_name TMB \
-    --cancer_type endometrial \
-    --pretrained_weights ./checkpoints/classification/best_model.pth \
-    --epochs 50 \
-    --lr 5e-5
+  --task biomarker \
+  --biomarker_name TMB \
+  --cancer_type endometrial \
+  --pretrained_weights checkpoints/best_model.pth \
+  --epochs 50
+```
 
-Evaluation
-To evaluate the model on a test set and generate performance metrics (AUC, F1-Score, Accuracy):
+---
 
-Bash
+## Evaluation
 
+```bash
 python evaluate.py \
-    --model_path ./checkpoints/best_model.pth \
-    --test_data /path/to/test_set \
-    --save_results ./results/
+  --model_path checkpoints/best_model.pth \
+  --test_data /path/to/test_set \
+  --save_results results/
+```
 
-Performance BenchmarksCancer TypeTaskAccuracyAUCBoneSubtyping (Osteosarcoma)98.4%0.99EndometrialBiomarker (POLE/TMB)99.1%0.99BreastSubtyping (IDC/ILC)96.2%0.97CervicalSubtyping97.1%0.98Note: Results based on internal validation using TCGA and private datasets.
+Reported metrics include Accuracy, Precision, Recall, F1-score, and Area Under the ROC Curve (AUROC).
 
-Citation
-If you find this code or research useful, please cite our work:
+---
 
-Code snippet
+## Experimental Results
 
+| Cancer Type | Task       | Accuracy | AUROC |
+| ----------- | ---------- | -------- | ----- |
+| Bone        | Subtyping  | 98.4%    | 0.99  |
+| Breast      | IDC vs ILC | 96.2%    | 0.97  |
+| Endometrial | POLE / TMB | 99.1%    | 0.99  |
+| Cervical    | Subtyping  | 97.1%    | 0.98  |
+
+Results are obtained using internal validation on TCGA and publicly available histopathology datasets.
+
+---
+
+## Interpretability
+
+UniViT-MIL provides attention-based heatmaps that highlight diagnostically relevant tissue regions contributing to slide-level predictions. These visualizations support qualitative analysis and clinical interpretability.
+
+---
+
+## Citation
+
+```bibtex
 @article{UniViT2025,
   title={UniViT-MIL: A Unified Vision Transformer and Multi-Instance Learning Framework for Multi-Cancer Histopathology},
   author={Abdel-Haii, Amr M. and Mohamed, Malak H.},
   journal={ISEF Projects},
   year={2025}
 }
+```
 
-License
-This project is licensed under the MIT License - see the LICENSE file for details.
+---
 
-Contact
-For questions or inquiries regarding the implementation, please contact:
+## Authors
 
-Amr M. Abdel-Haii - Amr.1424040@stemassiut.moe.edu.eg
+Amr M. Abdel-Haii
+[Amr.1424040@stemassiut.moe.edu.eg](mailto:Amr.1424040@stemassiut.moe.edu.eg)
 
-Malak H. Mohamed - Malak.1424553@stemassiut.moe.edu.eg
+Malak H. Mohamed
+[Malak.1424553@stemassiut.moe.edu.eg](mailto:Malak.1424553@stemassiut.moe.edu.eg)
+
+---
+
+## License
+
+This project is licensed under the MIT License.
