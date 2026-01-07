@@ -52,12 +52,27 @@ Clone the repository and install the required dependencies:
 git clone [https://github.com/YourUsername/UniViT-MIL.git](https://github.com/YourUsername/UniViT-MIL.git)
 cd UniViT-MIL
 pip install -r requirements.txt
-Data PreparationThe model expects Whole Slide Images (WSIs) or pre-extracted feature bags. The code is compatible with standard datasets such as TCGA, PANDA, and ICIAR.To process raw WSIs into patches:Bashpython data/preprocess_wsi.py \
+Data Preparation
+The model expects Whole Slide Images (WSIs) or pre-extracted feature bags. The code is compatible with standard datasets such as TCGA, PANDA, and ICIAR.
+
+To process raw WSIs into patches:
+
+Bash
+
+python data/preprocess_wsi.py \
     --source_dir /path/to/raw_slides \
     --output_dir /path/to/processed_patches \
     --patch_size 256 \
     --magnification 20x
-TrainingThe training process utilizes a combined loss function (Cross-Entropy + Contrastive Loss) to optimize the model.1. Multi-Cancer ClassificationTo train the model on the multi-organ dataset:Bashpython train.py \
+Training
+The training process utilizes a combined loss function (Cross-Entropy + Contrastive Loss) to optimize the model.
+
+1. Multi-Cancer Classification
+To train the model on the multi-organ dataset:
+
+Bash
+
+python train.py \
     --task classification \
     --data_root /path/to/data \
     --arch vit_base \
@@ -66,21 +81,50 @@ TrainingThe training process utilizes a combined loss function (Cross-Entropy + 
     --batch_size 32 \
     --lr 1e-4 \
     --save_dir ./checkpoints/classification
-2. Biomarker Prediction (e.g., Endometrial TMB)To fine-tune the model for biomarker prediction tasks:Bashpython train.py \
+
+2. Biomarker Prediction (e.g., Endometrial TMB)
+To fine-tune the model for biomarker prediction tasks:
+
+Bash
+
+python train.py \
     --task biomarker \
     --biomarker_name TMB \
     --cancer_type endometrial \
     --pretrained_weights ./checkpoints/classification/best_model.pth \
     --epochs 50 \
     --lr 5e-5
-EvaluationTo evaluate the model on a test set and generate performance metrics (AUC, F1-Score, Accuracy):Bashpython evaluate.py \
+
+Evaluation
+To evaluate the model on a test set and generate performance metrics (AUC, F1-Score, Accuracy):
+
+Bash
+
+python evaluate.py \
     --model_path ./checkpoints/best_model.pth \
     --test_data /path/to/test_set \
     --save_results ./results/
-Performance BenchmarksCancer TypeTaskAccuracyAUCBoneSubtyping (Osteosarcoma)98.4%0.99EndometrialBiomarker (POLE/TMB)99.1%0.99BreastSubtyping (IDC/ILC)96.2%0.97CervicalSubtyping97.1%0.98Note: Results based on internal validation using TCGA and private datasets.CitationIf you find this code or research useful, please cite our work:Code snippet@article{UniViT2025,
+
+Performance BenchmarksCancer TypeTaskAccuracyAUCBoneSubtyping (Osteosarcoma)98.4%0.99EndometrialBiomarker (POLE/TMB)99.1%0.99BreastSubtyping (IDC/ILC)96.2%0.97CervicalSubtyping97.1%0.98Note: Results based on internal validation using TCGA and private datasets.
+
+Citation
+If you find this code or research useful, please cite our work:
+
+Code snippet
+
+@article{UniViT2025,
   title={UniViT-MIL: A Unified Vision Transformer and Multi-Instance Learning Framework for Multi-Cancer Histopathology},
   author={Abdel-Haii, Amr M. and Mohamed, Malak H.},
   journal={ISEF Projects},
   year={2025}
 }
-LicenseThis project is licensed under the MIT License - see the LICENSE file for details.ContactFor questions or inquiries regarding the implementation, please contact:Amr M. Abdel-Haii - Amr.1424040@stemassiut.moe.edu.egMalak H. Mohamed - Malak.1424553@stemassiut.moe.edu.eg
+
+License
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+Contact
+For questions or inquiries regarding the implementation, please contact:
+
+Amr M. Abdel-Haii - Amr.1424040@stemassiut.moe.edu.eg
+
+Malak H. Mohamed - Malak.1424553@stemassiut.moe.edu.eg
