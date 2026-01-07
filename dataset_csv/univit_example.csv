@@ -1,0 +1,7 @@
+case_id,slide_id,label,biomarker_label
+patient_001,slide_001,tumor_tissue,TP53_mutant
+patient_001,slide_002,tumor_tissue,TP53_mutant
+patient_002,slide_003,normal_tissue,TP53_wildtype
+patient_003,slide_004,tumor_tissue,KRAS_mutant
+patient_004,slide_005,normal_tissue,EGFR_wildtype
+

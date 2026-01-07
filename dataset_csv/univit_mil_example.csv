@@ -1,0 +1,16 @@
+case_id,slide_id,label,biomarker_label
+patient_0,slide_0,tumor_tissue,TP53_mutant
+patient_0,slide_1,normal_tissue,TP53_wildtype
+patient_1,slide_2,tumor_tissue,KRAS_mutant
+patient_2,slide_3,normal_tissue,TP53_wildtype
+patient_2,slide_4,normal_tissue,EGFR_mutant
+patient_3,slide_5,tumor_tissue,TP53_mutant
+patient_4,slide_6,tumor_tissue,KRAS_mutant
+patient_5,slide_7,tumor_tissue,EGFR_mutant
+patient_6,slide_8,normal_tissue,TP53_wildtype
+patient_7,slide_9,tumor_tissue,TP53_mutant
+patient_7,slide_10,normal_tissue,TP53_wildtype
+patient_8,slide_11,tumor_tissue,KRAS_mutant
+patient_9,slide_12,normal_tissue,EGFR_mutant
+patient_10,slide_13,tumor_tissue,TP53_mutant
+
